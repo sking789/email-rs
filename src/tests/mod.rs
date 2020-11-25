@@ -1,112 +1,87 @@
-use super::email::Email;
-use super::header_value_parser::EmailHeader;
-
 #[cfg(test)]
 #[test]
-fn test_parse_simple_email() {
-    let emailstr = String::from(
-        "From: maxking@example.com
-To: something@person.com
-Date: 9th Oct 2019
-Subject: This is current email's subject
-Message-ID: <messagecanthavespace@localhost.localdomain>
-
-Hello World.
-",
-    );
+fn test_parse_google_mail() {
+    let emailstr: &str = include_str!("./gmail_cn.eml");
+    // let emailstr = std::fs::read_to_string("src/tests/gmail_cn.eml").unwrap();
 
     let email = Email::from_str(emailstr);
-    assert_eq!(email.body, String::from("Hello World.\n"));
-    // println!("{:?}", email.headers);
-    assert_eq!(email.headers.len(), 5);
-    for header in email.headers.iter() {
-        match header {
-            (_, EmailHeader::Subject(value)) => {
-                assert_eq!(value, "This is current email's subject")
-            }
-            (_, EmailHeader::To(value)) => assert_eq!(value, "something@person.com"),
-            (_, EmailHeader::From(value)) => assert_eq!(value, "maxking@example.com"),
-            (_, EmailHeader::MessageID(value)) => {
-                assert_eq!(value, "<messagecanthavespace@localhost.localdomain>")
-            }
-            (_, EmailHeader::Date(value)) => assert_eq!(value, "9th Oct 2019"),
-            (_, EmailHeader::GenericHeader { key, value }) => {
-                println!("Found unrecognized header {:?} with value {:?}", key, value)
-            }
-            _ => panic!("Unrecognized header type {:?}", header),
+    match email
+        .headers
+        .iter()
+        .find(|&x| x.0.eq_ignore_ascii_case("from"))
+    {
+        Some(value) => {
+            assert_eq!(
+                value.2.trim_start(),
+                "Zhang Huaqiang <zhanghuaqiang@gmail.com>"
+            );
         }
+        val => panic!("Expected from header found: {:?}", val),
     }
-}
-
-#[cfg(test)]
-#[test]
-fn test_parse_emails_with_multiline_headers() {
-    let emailstr = "From: maxking
-To: Someone
-Subject: This is a multiline subject
- which goes on for a while because I chose
- to fold it.
-
-This is the body of the email"
-        .to_string();
-    let email = Email::from_str(emailstr);
-    assert_eq!(email.body, "This is the body of the email".to_string());
-    assert_eq!(email.headers.len(), 3);
-    // println!("{:?}", email.headers);
-    for header in email.headers.iter() {
-        match header {
-            (_, EmailHeader::To(value)) => assert_eq!(value, "Someone"),
-            (_, EmailHeader::From(value)) => assert_eq!(value, "maxking"),
-            (_, EmailHeader::Subject(value)) => assert_eq!(
-                value,
-                "This is a multiline subject which goes on for a while because I chose to fold it."
-            ),
-            _ => println!("Unrecognized header {:?}", header),
+    // match email.headers.get("subject") {
+    match email
+        .headers
+        .iter()
+        .find(|&x| x.0.eq_ignore_ascii_case("subject"))
+    {
+        Some(value) => {
+            assert_eq!(
+                value.2.trim_start(),
+                "=?UTF-8?B?5rWL6K+V5pWw5o2u5Lit5paH5aW95LiN5aW95L2/?="
+            );
         }
+        val => panic!("Expected subject header found: {:?}", val),
     }
+
+    // match email
+    //     .headers
+    //     .iter()
+    //     .find(|&x| x.0.eq_ignore_ascii_case("date"))
+    // {
+    //     Some(value) => {
+    //         let date = date_time(value.2.as_bytes()).unwrap();
+    //         assert_eq!(
+    //             date.1,
+    //             DateTime {
+    //                 day_name: Some(Day::Friday),
+    //                 date: Date {
+    //                     day: 20,
+    //                     month: Month::November,
+    //                     year: 2020
+    //                 },
+    //                 time: TimeWithZone {
+    //                     time: Time {
+    //                         hour: 13,
+    //                         minute: 19,
+    //                         second: 57
+    //                     },
+    //                     zone: Zone {
+    //                         sign: true,
+    //                         hour_offset: 8,
+    //                         minute_offset: 0
+    //                     }
+    //                 }
+    //             }
+    //         );
+
+    //         assert_eq!(date.1.get_timestamp().unwrap(), 1605849597);
+    //     }
+    //     // val => panic!("Expected subject header found: {:?}", val),
+    //     // None => {}
+    //     None => {}
+    // }
+
+    let msg = email.get_dkim_message();
+    panic!("dkim_msg: {:?}", msg);
 }
+// #[test]
+// fn test_email_parser() {
+// let email_bytes: &[u8] = include_bytes!("./gmail_cn.eml");
+// println!("{:?}", email_bytes);
+// let emailstr = std::fs::read_to_string("src/tests/gmail_cn.eml").unwrap();
+// let email = Email::parse(email_bytes).unwrap();
 
-#[cfg(test)]
-#[test]
-fn test_parse_simple_multipart_email() {
-    let emailstr = "From: maxking@example.com
-To: aperson@example.com
-Subject: A multipart/alternative email with a HTML alternative.
-Content-Type: multipart/alternative; boundary=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+// let from = email.unknown_fields.iter().last();
 
---aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-Content-Transfer-Encoding: quoted-printable
-Content-Type: text/plain; charset=UTF-8
-Mime-Version: 1.0
-
-This is the plaintext alternative of the email.
-
---aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-Content-Transfer-Encoding: quoted-printable
-Content-Type: text/html; charset=UTF-8
-Mime-Version: 1.0
-
-<h1> Hello World </h1>
-
-<footer> Thanks for reading! </footer>"
-        .to_string();
-
-    let email = Email::from_str(emailstr);
-    assert_eq!(email.headers.len(), 4);
-    match email.headers.get("to") {
-        Some(EmailHeader::To(value)) => assert_eq!(value, "aperson@example.com"),
-        _ => panic!("Failed to get header value."),
-    }
-    match email.headers.get("content-type") {
-        Some(EmailHeader::ContentType {
-            maintype,
-            subtype,
-            value,
-        }) => {
-            assert_eq!(maintype, "multipart");
-            assert_eq!(subtype, "alternative");
-        }
-        val => panic!("Expected ContentType header found: {:?}", val),
-    }
-    // assert_eq!(email.children.len(), 2)
-}
+// println!("{:?}", from);
+// }

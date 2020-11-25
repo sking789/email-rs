@@ -18,3 +18,5 @@ maintenance = { status = "actively-developed" }
 
 
 [dependencies]
+base64 = {version = "0.12", default-features = false, features = ["alloc"] }
+ckb-std = "0.7.0"
