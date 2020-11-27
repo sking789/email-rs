@@ -1,4 +1,4 @@
-use crate::alloc::string::*;
+use crate::{dkim::DkimParsingError, alloc::string::*};
 use crate::alloc::vec::*;
 use crate::canonicalization::canonicalize_headers_simple;
 use crate::{dkim::CanonicalizationType, Header as DkimHeader};
@@ -41,12 +41,12 @@ impl<'a> Email<'a> {
         }
     }
     /// generate an Email from string object.
-    pub fn from_str(s: &str) -> Email {
+    pub fn from_str(s: &str) -> Result<Email, DkimParsingError> {
         let mut allheaders = Vec::new();
 
-        let mut val: Vec<&str> = s.split("\r\n\r\n").collect();
+        let mut val: Vec<&str> = s.splitn(2, "\r\n\r\n").collect();
         if val.len() == 1 {
-            val = s.split("\n\n").collect();
+            val = s.splitn(2,"\n\n").collect();
         }
 
         // ckb_std::debug!("{:?}", val);
@@ -74,17 +74,17 @@ impl<'a> Email<'a> {
         {
             Some(value) => {
                 // ckb_std::debug!("dkim-signature: {:?}", value.2);
-                let dkim_header = DkimHeader::parse("Dkim-Signature", value.2).unwrap();
+                let dkim_header = DkimHeader::parse("Dkim-Signature", value.2)?;
                 Some(dkim_header)
             }
-            None => None,
+            _ => { return Err(DkimParsingError::NotADkimSignatureHeader);}
         };
 
-        Email {
+        Ok(Email {
             headers: allheaders,
             dkim_header,
             body: val[1],
-        }
+        })
     }
 
     /// get_one_header tries to parse one header line from the provided buffer
@@ -104,10 +104,10 @@ impl<'a> Email<'a> {
                 }
             }
         }
-
-        let header_line = Some(&_s[..last]);
+        let mut header_line = Some(&_s[..last]);
         let mut rest = Some(&_s[last + 1..]);
-        if last + 1 == _s.len() || _s.as_bytes()[last + 1] == b'\r' {
+        if last + 1 == _s.len() {
+            header_line = Some(&_s[..]);
             rest = None;
         }
         (header_line, rest)
