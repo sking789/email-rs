@@ -13,7 +13,7 @@ use crate::alloc::vec::Vec;
 pub struct Header<'a> {
     pub(crate) algorithm: SigningAlgorithm,
     pub signature: Vec<u8>,
-    pub(crate) body_hash: Vec<u8>,
+    pub body_hash: Vec<u8>,
     pub(crate) canonicalization: (CanonicalizationType, CanonicalizationType),
     pub sdid: String,
     pub selector: String,
@@ -253,7 +253,7 @@ impl<'a> Header<'a> {
                             } else {
                                 let mut headers = Vec::new();
                                 for header in value.split(':') {
-                                    headers.push(header)
+                                    headers.push(header.trim())
                                 }
                                 signed_headers = Some(headers);
                             }

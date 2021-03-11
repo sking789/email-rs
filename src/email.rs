@@ -1,6 +1,6 @@
-use crate::{dkim::DkimParsingError, alloc::string::*};
 use crate::alloc::vec::*;
 use crate::canonicalization::canonicalize_headers_simple;
+use crate::{alloc::string::*, dkim::DkimParsingError};
 use crate::{dkim::CanonicalizationType, Header as DkimHeader};
 
 // use crate::header_value_parser::{create_header, EmailHeader};
@@ -46,7 +46,7 @@ impl<'a> Email<'a> {
 
         let mut val: Vec<&str> = s.splitn(2, "\r\n\r\n").collect();
         if val.len() == 1 {
-            val = s.splitn(2,"\n\n").collect();
+            val = s.splitn(2, "\n\n").collect();
         }
 
         // ckb_std::debug!("{:?}", val);
@@ -77,7 +77,9 @@ impl<'a> Email<'a> {
                 let dkim_header = DkimHeader::parse("Dkim-Signature", value.2)?;
                 Some(dkim_header)
             }
-            _ => { return Err(DkimParsingError::NotADkimSignatureHeader);}
+            _ => {
+                return Err(DkimParsingError::NotADkimSignatureHeader);
+            }
         };
 
         Ok(Email {
@@ -111,6 +113,30 @@ impl<'a> Email<'a> {
             rest = None;
         }
         (header_line, rest)
+    }
+
+    pub fn get_email_timestamp(&self) -> Result<u32, i32> {
+        let date = self.get_header_item("date")?;
+        // debug!("date {:?}", date);
+
+        let time = email_parser::parsing::time::date_time(date.as_bytes()).or(Err(1))?;
+        let timestamp = time.1.get_timestamp().or(Err(1))?;
+        // debug!("timestamp {:?}", timestamp);
+        Ok(timestamp)
+    }
+
+    pub fn get_header_item(&self, key: &'a str) -> Result<&'a str, i32> {
+        let value = self.headers.iter().find(|&x| x.0.eq_ignore_ascii_case(key));
+        let value = value.ok_or(1)?.2;
+        Ok(value)
+    }
+
+    pub fn extract_address_of_from(from: &str) -> Result<String, i32> {
+        let val: Vec<&str> = from
+            .trim_end()
+            .rsplitn(2, |c| c == '<' || c == ' ')
+            .collect();
+        Ok(val[0].replace(">", ""))
     }
 
     // /// generate an Email from raw bytes.

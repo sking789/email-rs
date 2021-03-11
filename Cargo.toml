@@ -1,22 +1,22 @@
 [package]
-name = "email-rs"
-version = "0.1.0"
 authors = ["Abhilash Raj <raj.abhilash1@gmail.com>"]
-edition = "2018"
-description = "Email parsing library"
-homepage = "https://github.com/maxking/email-rs"
-repository = "https://github.com/maxking/email-rs"
-readme = "README.md"
-keywords = ["email", "parser"]
 categories = ["email", "parsing"]
+description = "Email parsing library"
+edition = "2018"
+homepage = "https://github.com/maxking/email-rs"
+keywords = ["email", "parser"]
 license = "Apache-2.0"
 license-file = "LICENSE"
+name = "email-rs"
+readme = "README.md"
+repository = "https://github.com/maxking/email-rs"
+version = "0.1.0"
 
 [badges]
-travis-ci = { repository = "maxking/email-rs", branch = "master" }
-maintenance = { status = "actively-developed" }
-
+maintenance = {status = "actively-developed"}
+travis-ci = {repository = "maxking/email-rs", branch = "master"}
 
 [dependencies]
-base64 = {version = "0.12", default-features = false, features = ["alloc"] }
+base64 = {version = "0.12", default-features = false, features = ["alloc"]}
 ckb-std = "0.7.0"
+email-parser = {path = "../email-parser"}
