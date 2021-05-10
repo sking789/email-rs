@@ -1,7 +1,10 @@
-use crate::alloc::vec::*;
-use crate::canonicalization::canonicalize_headers_simple;
+use crate::canonicalization::{
+    canonicalize_body_relaxed, canonicalize_body_simple, canonicalize_headers_simple,
+};
 use crate::{alloc::string::*, dkim::DkimParsingError};
+use crate::{alloc::vec::*, canonicalization::canonicalize_headers_relaxed};
 use crate::{dkim::CanonicalizationType, Header as DkimHeader};
+use ckb_std::debug;
 
 // use crate::header_value_parser::{create_header, EmailHeader};
 /// Email represents an Email object and contains all the properties and data
@@ -25,7 +28,7 @@ impl<'a> Email<'a> {
             Some(value) => {
                 let headers = match value.canonicalization.0 {
                     CanonicalizationType::Relaxed => {
-                        canonicalize_headers_simple(&self.headers, &value.signed_headers)
+                        canonicalize_headers_relaxed(&self.headers, &value.signed_headers)
                     }
                     CanonicalizationType::Simple => {
                         canonicalize_headers_simple(&self.headers, &value.signed_headers)
@@ -129,6 +132,97 @@ impl<'a> Email<'a> {
         let value = self.headers.iter().find(|&x| x.0.eq_ignore_ascii_case(key));
         let value = value.ok_or(1)?.2;
         Ok(value)
+    }
+
+    pub fn get_canonicalized_body(&self) -> String {
+        match &self.dkim_header {
+            Some(value) => {
+                let body = match value.canonicalization.0 {
+                    CanonicalizationType::Relaxed => {
+                        canonicalize_body_relaxed(String::from(self.body))
+                    }
+                    CanonicalizationType::Simple => {
+                        String::from(canonicalize_body_simple(self.body))
+                    }
+                };
+
+                body
+                // String::from("")
+            }
+            None => String::from(""),
+        }
+    }
+
+    pub fn get_plain_body(&self) -> Result<String, i32> {
+        let content_type = self.get_header_item("Content-Type")?;
+
+        if content_type.contains(&"multipart") != true {
+            return Ok(String::from(self.body));
+        }
+
+        let vals: Vec<&str> = content_type.splitn(2, "boundary=").collect();
+        let mut boundary: String = String::from("--");
+        boundary.push_str(&vals[1].replace("\"", ""));
+
+        debug!("boundary is {}", boundary);
+        let parts: Vec<&str> = self.body.split(&boundary).collect();
+
+        debug!("parts len is {}", parts.len());
+
+        for part in &parts[1..] {
+            debug!("part size is {}", part.len());
+            if part.len() < 10 {
+                continue;
+            }
+
+            let mut val: Vec<&str> = part.split("\r\n\r\n").collect();
+            if val.len() == 1 {
+                val = part.splitn(2, "\n\n").collect();
+            }
+            debug!("val len is {}", val.len());
+
+            let content = val[1].trim_matches(|x| x == '\r' || x == '\n');
+
+            // get Content-Type/Content-Transfer-Encoding from headers
+            let mut headers: Vec<&str> = val[0].split("\r\n").collect();
+            if headers.len() == 1 {
+                headers = val[0].split("\n").collect();
+            }
+            debug!("headers len is {}", headers.len());
+
+            let mut content_type = "";
+            let mut encoding = "";
+
+            for header in headers {
+                let items: Vec<&str> = header.splitn(2, ":").collect();
+
+                if items[0].eq_ignore_ascii_case("content-type") {
+                    let types: Vec<&str> = items[1].splitn(2, ";").collect();
+                    content_type = types[0].trim();
+                } else if items[0].eq_ignore_ascii_case("content-transfer-encoding") {
+                    encoding = items[1].trim_start().trim_end_matches(|x| x == '\r');
+                }
+            }
+
+            debug!("encoding {}", encoding);
+            debug!("content_type {}", content_type);
+            if !content_type.eq_ignore_ascii_case("text/plain") {
+                continue;
+            }
+
+            if encoding.eq_ignore_ascii_case("base64") {
+                let canonicalized_content = content.replace("\r", "").replace("\n", "");
+                return Ok(String::from_utf8(
+                    base64::decode_config(canonicalized_content.trim(), base64::URL_SAFE_NO_PAD)
+                        .unwrap(),
+                )
+                .unwrap());
+            }
+
+            return Ok(String::from(content));
+        }
+
+        Ok(String::from(self.body))
     }
 
     pub fn extract_address_of_from(from: &str) -> Result<String, i32> {

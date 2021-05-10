@@ -1,10 +1,12 @@
+// use crate::Email;
+
 #[cfg(test)]
 #[test]
 fn test_parse_google_mail() {
     let emailstr: &str = include_str!("./gmail_cn.eml");
     // let emailstr = std::fs::read_to_string("src/tests/gmail_cn.eml").unwrap();
 
-    let email = Email::from_str(emailstr);
+    let email = Email::from_str(emailstr).unwrap();
     match email
         .headers
         .iter()
