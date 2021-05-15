@@ -212,11 +212,12 @@ impl<'a> Email<'a> {
 
             if encoding.eq_ignore_ascii_case("base64") {
                 let canonicalized_content = content.replace("\r", "").replace("\n", "");
-                return Ok(String::from_utf8(
-                    base64::decode_config(canonicalized_content.trim(), base64::URL_SAFE_NO_PAD)
-                        .unwrap(),
-                )
-                .unwrap());
+
+                let decoded_bytes =
+                    base64::decode_config(canonicalized_content.trim(), base64::STANDARD_NO_PAD)
+                        .unwrap();
+
+                return Ok(String::from_utf8_lossy(&decoded_bytes).into_owned());
             }
 
             return Ok(String::from(content));
