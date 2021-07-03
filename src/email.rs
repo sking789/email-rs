@@ -157,9 +157,15 @@ impl<'a> Email<'a> {
         let content_type = self.get_header_item("Content-Type")?;
 
         if content_type.contains(&"multipart") != true {
+            let content_transfer_encoding = self.get_header_item("Content-Transfer-Encoding")?;
+            if content_transfer_encoding.contains(&"base64") {
+                return base64_decode_body(self.body);
+            }
+
             return Ok(String::from(self.body));
         }
 
+        // split body by boundary
         let vals: Vec<&str> = content_type.splitn(2, "boundary=").collect();
         let mut boundary: String = String::from("--");
         boundary.push_str(&vals[1].replace("\"", ""));
@@ -169,13 +175,15 @@ impl<'a> Email<'a> {
 
         debug!("parts len is {}", parts.len());
 
+        // process body parts
         for part in &parts[1..] {
             debug!("part size is {}", part.len());
             if part.len() < 10 {
                 continue;
             }
 
-            let mut val: Vec<&str> = part.split("\r\n\r\n").collect();
+            // process part header
+            let mut val: Vec<&str> = part.splitn(2, "\r\n\r\n").collect();
             if val.len() == 1 {
                 val = part.splitn(2, "\n\n").collect();
             }
@@ -211,13 +219,7 @@ impl<'a> Email<'a> {
             }
 
             if encoding.eq_ignore_ascii_case("base64") {
-                let canonicalized_content = content.replace("\r", "").replace("\n", "");
-
-                let decoded_bytes =
-                    base64::decode_config(canonicalized_content.trim(), base64::STANDARD_NO_PAD)
-                        .unwrap();
-
-                return Ok(String::from_utf8_lossy(&decoded_bytes).into_owned());
+                return base64_decode_body(content);
             }
 
             return Ok(String::from(content));
@@ -248,6 +250,15 @@ impl<'a> Email<'a> {
     // fn new() -> Email {
     //     unimplemented!();
     // }
+}
+
+fn base64_decode_body(body: &str) -> Result<String, i32> {
+    let canonicalized_content = body.replace("\r", "").replace("\n", "");
+
+    let decoded_bytes =
+        base64::decode_config(canonicalized_content.trim(), base64::STANDARD_NO_PAD).unwrap();
+
+    return Ok(String::from_utf8_lossy(&decoded_bytes).into_owned());
 }
 
 #[test]
