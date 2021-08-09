@@ -118,15 +118,15 @@ impl<'a> Email<'a> {
         (header_line, rest)
     }
 
-    pub fn get_email_timestamp(&self) -> Result<u32, i32> {
-        let date = self.get_header_item("date")?;
-        // debug!("date {:?}", date);
+    // pub fn get_email_timestamp(&self) -> Result<u32, i32> {
+    //     let date = self.get_header_item("date")?;
+    //     // debug!("date {:?}", date);
 
-        let time = email_parser::parsing::time::date_time(date.as_bytes()).or(Err(1))?;
-        let timestamp = time.1.get_timestamp().or(Err(1))?;
-        // debug!("timestamp {:?}", timestamp);
-        Ok(timestamp)
-    }
+    //     let time = email_parser::parsing::time::date_time(date.as_bytes()).or(Err(1))?;
+    //     let timestamp = time.1.get_timestamp().or(Err(1))?;
+    //     // debug!("timestamp {:?}", timestamp);
+    //     Ok(timestamp)
+    // }
 
     pub fn get_header_item(&self, key: &'a str) -> Result<&'a str, i32> {
         let value = self.headers.iter().find(|&x| x.0.eq_ignore_ascii_case(key));
