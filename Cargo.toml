@@ -18,5 +18,5 @@ travis-ci = {repository = "maxking/email-rs", branch = "master"}
 
 [dependencies]
 base64 = {version = "0.12", default-features = false, features = ["alloc"]}
-ckb-std = "0.7.0"
+# ckb-std = "0.7.0"
 # email-parser = {path = "../email-parser"}

@@ -4,7 +4,7 @@ use crate::canonicalization::{
 use crate::{alloc::string::*, dkim::DkimParsingError};
 use crate::{alloc::vec::*, canonicalization::canonicalize_headers_relaxed};
 use crate::{dkim::CanonicalizationType, Header as DkimHeader};
-use ckb_std::debug;
+// use ckb_std::debug;
 
 // use crate::header_value_parser::{create_header, EmailHeader};
 /// Email represents an Email object and contains all the properties and data
@@ -170,14 +170,14 @@ impl<'a> Email<'a> {
         let mut boundary: String = String::from("--");
         boundary.push_str(&vals[1].replace("\"", ""));
 
-        debug!("boundary is {}", boundary);
+        // debug!("boundary is {}", boundary);
         let parts: Vec<&str> = self.body.split(&boundary).collect();
 
-        debug!("parts len is {}", parts.len());
+        // debug!("parts len is {}", parts.len());
 
         // process body parts
         for part in &parts[1..] {
-            debug!("part size is {}", part.len());
+            // debug!("part size is {}", part.len());
             if part.len() < 10 {
                 continue;
             }
@@ -187,7 +187,7 @@ impl<'a> Email<'a> {
             if val.len() == 1 {
                 val = part.splitn(2, "\n\n").collect();
             }
-            debug!("val len is {}", val.len());
+            // debug!("val len is {}", val.len());
 
             let content = val[1].trim_matches(|x| x == '\r' || x == '\n');
 
@@ -196,7 +196,7 @@ impl<'a> Email<'a> {
             if headers.len() == 1 {
                 headers = val[0].split("\n").collect();
             }
-            debug!("headers len is {}", headers.len());
+            // debug!("headers len is {}", headers.len());
 
             let mut content_type = "";
             let mut encoding = "";
@@ -212,8 +212,8 @@ impl<'a> Email<'a> {
                 }
             }
 
-            debug!("encoding {}", encoding);
-            debug!("content_type {}", content_type);
+            // debug!("encoding {}", encoding);
+            // debug!("content_type {}", content_type);
             if !content_type.eq_ignore_ascii_case("text/plain") {
                 continue;
             }
