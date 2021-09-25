@@ -17,32 +17,32 @@ pub struct Email<'a> {
     /// going to parse only simple emails.
     pub body: &'a str,
 
-    pub dkim_header: Option<DkimHeader<'a>>,
+    pub dkim_headers: Vec<DkimHeader<'a>>,
 }
 
 /// For simplicity Email's body is now just going to be string.
 
 impl<'a> Email<'a> {
-    pub fn get_dkim_message(&self) -> String {
-        match &self.dkim_header {
-            Some(value) => {
-                let headers = match value.canonicalization.0 {
+    pub fn get_dkim_message(&self) -> Vec<String> {
+        self.dkim_headers
+            .iter()
+            .map(|dkim_header| {
+                let headers = match dkim_header.canonicalization.0 {
                     CanonicalizationType::Relaxed => {
-                        canonicalize_headers_relaxed(&self.headers, &value.signed_headers)
+                        canonicalize_headers_relaxed(&self.headers, &dkim_header.signed_headers)
                     }
                     CanonicalizationType::Simple => {
-                        canonicalize_headers_simple(&self.headers, &value.signed_headers)
+                        canonicalize_headers_simple(&self.headers, &dkim_header.signed_headers)
                     }
                 };
 
                 let mut msg_str: String = headers.to_string();
-                msg_str.push_str(value.original.as_ref().unwrap());
+                msg_str.push_str(dkim_header.original.as_ref().unwrap());
                 msg_str
-                // String::from("")
-            }
-            None => String::from(""),
-        }
+            })
+            .collect()
     }
+
     /// generate an Email from string object.
     pub fn from_str(s: &str) -> Result<Email, DkimParsingError> {
         let mut allheaders = Vec::new();
@@ -71,23 +71,15 @@ impl<'a> Email<'a> {
             }
         }
 
-        let dkim_header = match allheaders
+        let dkim_headers: Vec<DkimHeader> = allheaders
             .iter()
-            .find(|&x| x.0.eq_ignore_ascii_case("dkim-signature"))
-        {
-            Some(value) => {
-                // ckb_std::debug!("dkim-signature: {:?}", value.2);
-                let dkim_header = DkimHeader::parse("Dkim-Signature", value.2)?;
-                Some(dkim_header)
-            }
-            _ => {
-                return Err(DkimParsingError::NotADkimSignatureHeader);
-            }
-        };
+            .filter(|&x| x.0.eq_ignore_ascii_case("dkim-signature"))
+            .map(|&val| DkimHeader::parse("Dkim-Signature", val.2))
+            .collect::<Result<Vec<DkimHeader>, DkimParsingError>>()?;
 
         Ok(Email {
             headers: allheaders,
-            dkim_header,
+            dkim_headers,
             body: val[1],
         })
     }
@@ -134,24 +126,24 @@ impl<'a> Email<'a> {
         Ok(value)
     }
 
-    pub fn get_canonicalized_body(&self) -> String {
-        match &self.dkim_header {
-            Some(value) => {
-                let body = match value.canonicalization.0 {
-                    CanonicalizationType::Relaxed => {
-                        canonicalize_body_relaxed(String::from(self.body))
-                    }
-                    CanonicalizationType::Simple => {
-                        String::from(canonicalize_body_simple(self.body))
-                    }
-                };
+    // pub fn get_canonicalized_body(&self) -> String {
+    //     match &self.dkim_header {
+    //         Some(value) => {
+    //             let body = match value.canonicalization.0 {
+    //                 CanonicalizationType::Relaxed => {
+    //                     canonicalize_body_relaxed(String::from(self.body))
+    //                 }
+    //                 CanonicalizationType::Simple => {
+    //                     String::from(canonicalize_body_simple(self.body))
+    //                 }
+    //             };
 
-                body
-                // String::from("")
-            }
-            None => String::from(""),
-        }
-    }
+    //             body
+    //             // String::from("")
+    //         }
+    //         None => String::from(""),
+    //     }
+    // }
 
     pub fn get_plain_body(&self) -> Result<String, i32> {
         let content_type = self.get_header_item("Content-Type")?;
