@@ -83,7 +83,7 @@ impl<'a> Email<'a> {
         Ok(Email {
             headers: allheaders,
             dkim_headers,
-            body: val[1],
+            body: val.get(1).unwrap_or(&""),
         })
     }
 
@@ -104,12 +104,16 @@ impl<'a> Email<'a> {
                 }
             }
         }
-        let mut header_line = Some(&_s[..last]);
-        let mut rest = Some(&_s[last + 1..]);
+        let header_line;
+        let rest;
         if last + 1 == _s.len() {
             header_line = Some(&_s[..]);
             rest = None;
+        } else {
+            header_line = Some(&_s[..last]);
+            rest = Some(&_s[last + 1..]);
         }
+
         (header_line, rest)
     }
 
