@@ -63,7 +63,10 @@ impl<'a> Email<'a> {
                     allheaders.push((
                         key_val[0],
                         ":",
-                        key_val[1].trim_start().trim_end_matches(|x| x == '\r'),
+                        key_val
+                            .get(1)
+                            .map(|v| v.trim_start().trim_end_matches(|x| x == '\r'))
+                            .unwrap_or_default(),
                     ));
                     headers = rest;
                 }
@@ -92,7 +95,7 @@ impl<'a> Email<'a> {
         for (i, &x) in bytes.iter().enumerate() {
             last = i;
             if x == b'\n' {
-                if bytes[i + 1] == b' ' || bytes[i + 1] == b'\t' {
+                if bytes.get(i + 1) == Some(&b' ') || bytes.get(i + 1) == Some(&b'\t') {
                     // If the next line starts with a whitespace, we continue
                     // parsing as a part of this same header.
                     continue;
