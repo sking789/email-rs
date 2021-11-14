@@ -63,7 +63,10 @@ impl<'a> Email<'a> {
                     allheaders.push((
                         key_val[0],
                         ":",
-                        key_val[1].trim_start().trim_end_matches(|x| x == '\r'),
+                        key_val
+                            .get(1)
+                            .map(|v| v.trim_start().trim_end_matches(|x| x == '\r'))
+                            .unwrap_or_default(),
                     ));
                     headers = rest;
                 }
