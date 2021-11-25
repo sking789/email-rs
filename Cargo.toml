@@ -13,10 +13,12 @@ repository = "https://github.com/maxking/email-rs"
 version = "0.1.0"
 
 [badges]
-maintenance = {status = "actively-developed"}
-travis-ci = {repository = "maxking/email-rs", branch = "master"}
+maintenance = { status = "actively-developed" }
+travis-ci = { repository = "maxking/email-rs", branch = "master" }
 
 [dependencies]
-base64 = {version = "0.12", default-features = false, features = ["alloc"]}
-# ckb-std = "0.7.0"
-# email-parser = {path = "../email-parser"}
+base64 = { version = "0.13", default-features = false, features = ["alloc"] }
+charset = { git = "https://github.com/zzhengzhuo/charset.git", branch = "no_std" ,default-features = false,features = ["alloc"]}
+quoted_printable = { git = "https://github.com/zzhengzhuo/quoted-printable.git", default-features = false, features = [
+    "alloc",
+] }

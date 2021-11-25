@@ -1,4 +1,4 @@
-// use crate::Email;
+use crate::Email;
 
 #[cfg(test)]
 #[test]
