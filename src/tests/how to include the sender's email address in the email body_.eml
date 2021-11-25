@@ -1,0 +1,135 @@
+Delivered-To: jason@lay2.dev
+Received: by 2002:a5d:4402:0:0:0:0:0 with SMTP id z2csp406816wrq;
+        Wed, 24 Nov 2021 22:43:50 -0800 (PST)
+X-Google-Smtp-Source: ABdhPJxzy/RMwwE4h12r1T6rf+8BOXev2Is/l1QDwwb5L2Ey0rCb+/sBiXMde2hnN6JYsjExaUbo
+X-Received: by 2002:a17:907:720b:: with SMTP id dr11mr29193100ejc.93.1637822630389;
+        Wed, 24 Nov 2021 22:43:50 -0800 (PST)
+ARC-Seal: i=2; a=rsa-sha256; t=1637822630; cv=pass;
+        d=google.com; s=arc-20160816;
+        b=TNbqIoAZc+7qweWrV7NqpCTGhA0MyeyOL6qQBeyNyu/v/XsQxI2npS1ucACLti7zPL
+         Dhsd12zI3+e7wXZgbtsSw3e6wXfAKNgTOhBpp8//Yn1DX8atXzZpedv5fb0GaGjW65kE
+         5OK4z5USsyu/a/FS1hJ8WBo4gPI65f8QHD4EQVYOZyaGmFQFwX9v3yirimgaSC7GBHMP
+         3ncWdiUcy1l115xX0Kvq9PwkYdEcF9XUVPO/qHQDak39exMc8T8YyJn4s3m6qbvaYk24
+         y9ndfiGXGbBRUIsjo9ojrOJviA1fuo5UDO1pr5LuM0mqSKE6QlodKNqbMQRvUrY3ZCov
+         Uscw==
+ARC-Message-Signature: i=2; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20160816;
+        h=mime-version:suggested_attachment_session_id:content-language
+         :accept-language:message-id:date:thread-index:thread-topic:subject
+         :to:from:dkim-signature;
+        bh=PomFvu3Epofgu3aYEMVNQRVniBuZQrIe76n5+pGtGHs=;
+        b=jq8EikP8SWpPvrDn3rtwdG2mA6CEegzFbuQcHHZklH/F/JF5W1fXm4AA2NpnFbzQbQ
+         Fl+8UHwxqe3UBrYZ7/wJI1/QzForaPnxebh0DeMXcYBc2pZVghY48PXibe6a+rkeASYJ
+         ASzdKa05WO1naFoaQVDdHKMwrgqt2Ou6HSJBWbtoQXkdSMV93Rph8DAqRXAQa5Nq2GGu
+         gg2myOWYwo94slHjjoRjqxtHbsqcx33mzt9+2XI7RPQO2u5ZtleJgI09y8oKops4sgoC
+         RZLA/q4iBq+dRzyqL7oM22t+wF0QP8u5pqF3n+EtF0x4pwGc5MDXsBsZDf//mcN7ZQmS
+         p2og==
+ARC-Authentication-Results: i=2; mx.google.com;
+       dkim=pass header.i=@outlook.com header.s=selector1 header.b=lGM30kNO;
+       arc=pass (i=1);
+       spf=pass (google.com: domain of cryptostwith@outlook.com designates 2a01:111:f403:7010::80d as permitted sender) smtp.mailfrom=CryptoStwith@outlook.com;
+       dmarc=pass (p=NONE sp=QUARANTINE dis=NONE) header.from=outlook.com
+Return-Path: <CryptoStwith@outlook.com>
+Received: from JPN01-TYC-obe.outbound.protection.outlook.com (mail-tycjpn01olkn2080d.outbound.protection.outlook.com. [2a01:111:f403:7010::80d])
+        by mx.google.com with ESMTPS id i19si5132038edj.581.2021.11.24.22.43.50
+        for <jason@lay2.dev>
+        (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
+        Wed, 24 Nov 2021 22:43:50 -0800 (PST)
+Received-SPF: pass (google.com: domain of cryptostwith@outlook.com designates 2a01:111:f403:7010::80d as permitted sender) client-ip=2a01:111:f403:7010::80d;
+Authentication-Results: mx.google.com;
+       dkim=pass header.i=@outlook.com header.s=selector1 header.b=lGM30kNO;
+       arc=pass (i=1);
+       spf=pass (google.com: domain of cryptostwith@outlook.com designates 2a01:111:f403:7010::80d as permitted sender) smtp.mailfrom=CryptoStwith@outlook.com;
+       dmarc=pass (p=NONE sp=QUARANTINE dis=NONE) header.from=outlook.com
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=oZ7F9/11DlK8rYOTsI4sYDx+qXYH7AdHoTd34jJh7NmGhmz/+SXgq4ZJ19PYu5xJ4lkQhJYT+pEQi+8xVrcnVNxGtNpOhjdbj+bykkDo0gYC0VlOe5t07EaUb1h7mCDGcbJEcJBtAlPCTKzFUtNkC6NQL3fz8D2EcThIVbYz6LcFyhclIyIqtM1/ofsbbRNTlh98/Y/CwDmxdxEUxKbYe9inisj503PNyFWiHufoIPiynnriscLPbZDmxUFE3jwvGjjdOA+PiYpaeO1/iMqRvSGmlNlNvrG4njkIezVAhWfk/D9nH6wD0Zelva57W++qM8e/EUePy5LTM0OQEzxWzg==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=PomFvu3Epofgu3aYEMVNQRVniBuZQrIe76n5+pGtGHs=;
+ b=cL1V/z9Tkt/KojwdC2XgPiTGeUxKIfsHVMWc2PhP4Ts+PrAc1Uw43zQdY6J0ptfdjbs3i5AJY+cbEf0hFXqPFESOm3JmcUxpWkW2r+gxpakE79qA3MR+UVZarnYk499okH8VGRXQ3cFG4ktV1cumTeSz/gttkmZgPBXVh6CKDgrZeTJCEti1pwKUQqSA7kWtJfLgfS1vRoWs/F6Sh1eYLp6wZNmwW15/zt5km4x/fcFkxZIpdKrGAQpjJIA1zHmZz2umaiXhCMR1vuLzrBCP7CCsaVFjHSYYMR0A4ZQ1+tLVeorjbNv2fWoJMHbH4Nko0ausp3fKZSuq7qSsZEIOcA==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=none; dmarc=none;
+ dkim=none; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=outlook.com;
+ s=selector1;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=PomFvu3Epofgu3aYEMVNQRVniBuZQrIe76n5+pGtGHs=;
+ b=lGM30kNO9KJo3KvKVLqr0fAS6ruyObPA9AdlZRK8iT/AQTJ3bshUI8vIaJGrIbm/8U4y9vU2hEFcV4ueVirTFilasGYknze9sFFgtb7pP9cfM8Y+EpEUUf4VdB/gxdiPQe0LcAT0Bv0CrgyGUqvSnFD1kdHHyoV8TAI06YsmSM3Pm0eyaT3iHKKr4xD1AQmaiy0aLHMgPjCFSJhj5XSRd5S/EWvluAEIfyFZuCkyrp1O5rcUV1Lzm9tuRyfKThCLQZpw4dfTNfE/3Has4+H1PasLy+uyubXoLJujA6uTrh77uZmgAvSB/JTX/OgBJKNzC/8AXxEUrIuP6A9p2NS+Ng==
+Received: from OSZP286MB1896.JPNP286.PROD.OUTLOOK.COM (2603:1096:604:165::9)
+ by OS3P286MB1961.JPNP286.PROD.OUTLOOK.COM (2603:1096:604:1a0::9) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4734.20; Thu, 25 Nov
+ 2021 06:43:47 +0000
+Received: from OSZP286MB1896.JPNP286.PROD.OUTLOOK.COM
+ ([fe80::8192:aa42:64ea:805a]) by OSZP286MB1896.JPNP286.PROD.OUTLOOK.COM
+ ([fe80::8192:aa42:64ea:805a%3]) with mapi id 15.20.4713.026; Thu, 25 Nov 2021
+ 06:43:47 +0000
+From: crypto stitch <CryptoStwith@outlook.com>
+To: jingsong cai <jason@lay2.dev>
+Subject:
+ =?gb2312?B?16q3oqO6aG93IHRvIGluY2x1ZGUgdGhlIHNlbmRlcidzIGVtYWlsIGFkZHJl?=
+ =?gb2312?Q?ss_in_the_email_body=3F?=
+Thread-Topic:
+ =?gb2312?B?16q3oqO6aG93IHRvIGluY2x1ZGUgdGhlIHNlbmRlcidzIGVtYWlsIGFkZHJl?=
+ =?gb2312?Q?ss_in_the_email_body=3F?=
+Thread-Index: AQHX4cfMx8HrMyjrwka0LoNsrRsjcg==
+Date: Thu, 25 Nov 2021 06:43:47 +0000
+Message-ID:
+ <OSZP286MB18960556D6925A963C8FD926CE629@OSZP286MB1896.JPNP286.PROD.OUTLOOK.COM>
+Accept-Language: zh-CN, en-US
+Content-Language: zh-CN
+X-MS-Has-Attach:
+X-MS-TNEF-Correlator:
+suggested_attachment_session_id: 69b60069-edff-ab8c-c3e4-65aa9eb15994
+x-ms-exchange-messagesentrepresentingtype: 1
+x-tmn: [AKLX9hdbWtFMHo2tSTCOPw1qREkXh1ux]
+x-ms-publictraffictype: Email
+x-ms-office365-filtering-correlation-id: 3768d35b-2859-48b3-9950-08d9afdeeed0
+x-ms-traffictypediagnostic: OS3P286MB1961:
+x-microsoft-antispam: BCL:0;
+x-microsoft-antispam-message-info:
+ xWhInPg0tTGSgZx7Lmrx3Uy1WSDVG8/O81arjPzpnn7Rh6qfxAkqAoBHYwc1hRX26bB4w2hToOEYRPb7vqjIsjexqb0Q0TnYYjfW/2Jv83nGOGnaMN17+47uKPpIbzEtpAKAD+MM/JxyZ30+z9h8y3ZTbejliv+xtFUUEdIICB+MPteLmHwGiYGwmtaDwb/i/NwgiKOqZviwGKlxb+WVYU8sIYrbvp/pREoYKXr4xPBkFoXQLnPWcx39PEcZkIzlvY5TP+VNw+lRQ/zKUZHJaFP30PlUjxkcfpKKW6+/5dwwUcVuuYrm6tPNsRPhsGojVY+cKlojuRtdDOx6ZoyEHE6Q2EdhM+CpYGRn5IEt48OalKZ9ayTpRvEWAzx78Vi6suJviGcUJpQ/fO9HCdAOK5hnBxq3ZebedOgAM8B47TYnWdZmFS8c/58WeVxVCmjjXo9tcHLzqiLX0u9X8JNBQUhcWfq3Ml7zK3mc3DMdZOlGFgSgh7iorjG9NCbxmNQXpNO/K4wzwePArdYNRjP2Nepb4vcLnIUQ5A7pgcE2LBuIbVnKoOQ1wPYKkYMqASxnzuAIHqLvgpwyNT/A/5hnyQ==
+x-ms-exchange-antispam-messagedata-chunkcount: 1
+x-ms-exchange-antispam-messagedata-0:
+ nuUnFxjEUV/CdouNAOYVl1+E1KPskcjnjxxcS22iHEBtoUPQzQiVbGFbj0yVUJPAgnoPX+ioKGax5rXF+nrURlhTsvxHIxVmBcjJjrRCTtszOz+w/niORciCK8BJ7wkx0BRYraqWUKhUnryK6B8OtUd0wceLtXf7Fi+pYILAcrmE6RIpehxx27hOlFTO28pPJ/oOboF/9ZvFdhJzz0mUVLGs4J9zoadwiscaLN6u426DyUoIPDxDOQBhuNtlAz+ibvU6mDunurjkiNZsvFMCZMdiWH+YNlmf7ISaWTyI1uzjn5BiJxQAF+TOzzttgd6QcoECGLqNukHNixwALJ/zG5LGCE6Ahh/QLtjoMjDkTiHFQMMsde04HIQuHRvgmU7vElcLihdH6P1GfvcVym9Nq3VHV0x7qZWG6mofs7P8lwCtXeOwdEPF+rv1SKiAa2+BZh0RuK/aEHDHqc1BwDnNFaMLtdzf2/a4Z9wSS+iwqbxfw6JiubIKHv1OBgfCtuCJfd7UPC1tio+GdDp7UVJdHlRdQj7peEdLXi6iOQxfIbXECJaMURZO4DMyHWwBBSRBQ+GzdBkNsTM94PM3RumGUFPbRspq2Xi7n+pHpVoPVL0wv3VKXzrVy+/h8+Zse9yEpmdpCKlS0iSp5tW4UjO7HdDavSqiWw4gXXalXhz1ZBoKKVVp7g83TZkKi6InLJe41JB+kNdILE8cnVvknKB4Xw==
+Content-Type: multipart/alternative;
+	boundary="_000_OSZP286MB18960556D6925A963C8FD926CE629OSZP286MB1896JPNP_"
+MIME-Version: 1.0
+X-OriginatorOrg: outlook.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-AuthSource: OSZP286MB1896.JPNP286.PROD.OUTLOOK.COM
+X-MS-Exchange-CrossTenant-RMS-PersistedConsumerOrg: 00000000-0000-0000-0000-000000000000
+X-MS-Exchange-CrossTenant-Network-Message-Id: 3768d35b-2859-48b3-9950-08d9afdeeed0
+X-MS-Exchange-CrossTenant-originalarrivaltime: 25 Nov 2021 06:43:47.2470
+ (UTC)
+X-MS-Exchange-CrossTenant-fromentityheader: Hosted
+X-MS-Exchange-CrossTenant-id: 84df9e7f-e9f6-40af-b435-aaaaaaaaaaaa
+X-MS-Exchange-CrossTenant-rms-persistedconsumerorg: 00000000-0000-0000-0000-000000000000
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: OS3P286MB1961
+
+--_000_OSZP286MB18960556D6925A963C8FD926CE629OSZP286MB1896JPNP_
+Content-Type: text/plain; charset="gb2312"
+Content-Transfer-Encoding: base64
+
+16q3oqO6aG93IHRvIGluY2x1ZGUgdGhlIHNlbmRlcidzIGVtYWlsIGFkZHJlc3MgaW4gdGhlIGVt
+YWlsIGJvZHk/DQo=
+
+--_000_OSZP286MB18960556D6925A963C8FD926CE629OSZP286MB1896JPNP_
+Content-Type: text/html; charset="gb2312"
+Content-Transfer-Encoding: quoted-printable
+
+<html>
+<head>
+<meta http-equiv=3D"Content-Type" content=3D"text/html; charset=3Dgb2312">
+<style type=3D"text/css" style=3D"display:none;"> P {margin-top:0;margin-bo=
+ttom:0;} </style>
+</head>
+<body dir=3D"ltr">
+<div style=3D"font-family: Calibri, Arial, Helvetica, sans-serif; font-size=
+: 12pt; color: rgb(0, 0, 0);">
+=D7=AA=B7=A2=A3=BAhow to include the sender's email address in the email bo=
+dy?<br>
+</div>
+</body>
+</html>
+
+--_000_OSZP286MB18960556D6925A963C8FD926CE629OSZP286MB1896JPNP_--

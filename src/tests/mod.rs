@@ -1,4 +1,4 @@
-// use crate::Email;
+use crate::Email;
 
 #[cfg(test)]
 #[test]
@@ -87,3 +87,36 @@ fn test_parse_google_mail() {
 
 // println!("{:?}", from);
 // }
+
+#[test]
+fn test_header_decode() {
+    {
+        let emailstr: &str = include_str!("./test_email.eml");
+        let email = Email::from_str(emailstr).unwrap();
+        let subject = email.get_header_value("subject").unwrap();
+        assert_eq!(
+            subject,
+            "转发 长长长长长0xba069a60f5b6e6ad758b877a79bad51731d6ca6b456fa93255c028939bd9b552"
+        );
+    }
+    {
+        let emailstr: &str =
+            include_str!("./how to include the sender's email address in the email body_.eml");
+        let email = Email::from_str(emailstr).unwrap();
+        let subject = email.get_header_value("subject").unwrap();
+        assert_eq!(
+            subject,
+            "转发：how to include the sender's email address in the email body?"
+        );
+    }
+    {
+        let emailstr: &str =
+            include_str!("./how to include the sender's email address in the email body_ (1).eml");
+        let email = Email::from_str(emailstr).unwrap();
+        let subject = email.get_header_value("subject").unwrap();
+        assert_eq!(
+            subject,
+            "转发：how to include the sender's email address in the email body?"
+        );
+    }
+}

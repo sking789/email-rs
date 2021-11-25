@@ -1,6 +1,7 @@
 use crate::canonicalization::{
     canonicalize_body_relaxed, canonicalize_body_simple, canonicalize_headers_simple,
 };
+use crate::header::HeaderToken;
 use crate::{alloc::string::*, dkim::DkimParsingError};
 use crate::{alloc::vec::*, canonicalization::canonicalize_headers_relaxed};
 use crate::{dkim::CanonicalizationType, Header as DkimHeader};
@@ -131,6 +132,29 @@ impl<'a> Email<'a> {
         let value = self.headers.iter().find(|&x| x.0.eq_ignore_ascii_case(key));
         let value = value.ok_or(1)?.2;
         Ok(value)
+    }
+
+    pub fn get_header_value(&self,key:&'a str) -> Result<String,i32> {
+        let item = self.get_header_item(key)?;
+        let mut res = String::new();
+        for tok in crate::header::normalized_tokens(item){
+            match tok {
+                HeaderToken::Text(t) => {
+                    res.push_str(t);
+                }
+                HeaderToken::Whitespace(ws) => {
+                    res.push_str(ws);
+                }
+                HeaderToken::Newline(Some(ws)) => {
+                    res.push_str(&ws);
+                }
+                HeaderToken::Newline(None) => {}
+                HeaderToken::DecodedWord(dw) => {
+                    res.push_str(&dw);
+                }
+            }
+        }
+        Ok(res)
     }
 
     // pub fn get_canonicalized_body(&self) -> String {
