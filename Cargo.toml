@@ -18,7 +18,7 @@ travis-ci = { repository = "maxking/email-rs", branch = "master" }
 
 [dependencies]
 base64 = { version = "0.13", default-features = false, features = ["alloc"] }
-charset = { git = "https://github.com/zzhengzhuo/charset.git", branch = "no_std" ,default-features = false,features = ["alloc"]}
+# charset = { git = "https://github.com/zzhengzhuo/charset.git", branch = "no_std" ,default-features = false,features = ["alloc"]}
 quoted_printable = { git = "https://github.com/zzhengzhuo/quoted-printable.git", default-features = false, features = [
     "alloc",
 ] }

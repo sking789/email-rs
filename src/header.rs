@@ -1,5 +1,9 @@
-use alloc::{borrow::ToOwned, string::{String, ToString}, vec::Vec};
-use charset::Charset;
+use alloc::{
+    borrow::ToOwned,
+    string::{String, ToString},
+    vec::Vec,
+};
+// use charset::Charset;
 
 use crate::find_from;
 
@@ -63,8 +67,9 @@ fn decode_word(encoded: &str) -> Option<String> {
         }
         _ => return None,
     };
-    let charset = Charset::for_label_no_replacement(charset.as_bytes())?;
-    let (cow, _) = charset.decode_without_bom_handling(&decoded);
+    // let charset = Charset::for_label_no_replacement(charset.as_bytes())?;
+    // let (cow, _) = charset.decode_without_bom_handling(&decoded);
+    let cow = String::from_utf8_lossy(&decoded);
     Some(cow.into_owned())
 }
 
