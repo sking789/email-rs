@@ -223,3 +223,102 @@ fn normalize_header_whitespace(tokens: Vec<HeaderToken>) -> Vec<HeaderToken> {
 pub fn normalized_tokens(raw_value: &str) -> Vec<HeaderToken> {
     normalize_header_whitespace(tokenize_header(&raw_value))
 }
+
+#[derive(Debug)]
+pub struct SubjectHeader<'a> {
+    pub value: Vec<&'a str>,
+    pub is_base64: Vec<bool>,
+}
+
+impl<'a> SubjectHeader<'a> {
+    fn decode_subject(encoded: &str) -> Option<(&str, bool)> {
+        let ix_delim1 = encoded.find('?')?;
+        let ix_delim2 = find_from(encoded, ix_delim1 + 1, "?")?;
+
+        let charset = &encoded[0..ix_delim1];
+        let transfer_coding = &encoded[ix_delim1 + 1..ix_delim2];
+        let input = &encoded[ix_delim2 + 1..];
+
+        match transfer_coding {
+            "B" | "b" => Some((input, true)),
+            "Q" | "q" => {
+                // The quoted_printable module does a trim_end on the input, so if
+                // that affects the output we should save and restore the trailing
+                // whitespace
+                Some((input, false))
+            }
+            _ => None,
+        }
+        // let charset = Charset::for_label_no_replacement(charset.as_bytes())?;
+        // let (cow, _) = charset.decode_without_bom_handling(&decoded);
+    }
+
+    pub fn tokenize_subject_header_line(line: &'a str) -> Self {
+        fn is_whitespace(text: &str) -> bool {
+            if text.trim_end().len() == 0 {
+                true
+            } else {
+                false
+            }
+        }
+
+        let mut value = Vec::new();
+        let mut is_base64 = Vec::new();
+        let mut ix_search = 0;
+        loop {
+            match find_from(line, ix_search, "=?") {
+                Some(v) => {
+                    let ix_begin = v + 2;
+                    if !is_boundary(line, ix_begin.checked_sub(3)) {
+                        value.push(&line[ix_search..ix_begin]);
+                        is_base64.push(false);
+                        ix_search = ix_begin;
+                        continue;
+                    }
+                    if !is_whitespace(&line[ix_search..ix_begin - 2]) {
+                        value.push(&line[ix_search..ix_begin - 2]);
+                        is_base64.push(false);
+                    }
+                    let mut ix_end_search = ix_begin;
+                    loop {
+                        match find_from(line, ix_end_search, "?=") {
+                            Some(ix_end) => {
+                                if !is_boundary(line, ix_end.checked_add(2)) {
+                                    ix_end_search = ix_end + 2;
+                                    continue;
+                                }
+                                match Self::decode_subject(&line[ix_begin..ix_end]) {
+                                    Some((s_value, s_is_base64)) => {
+                                        is_base64.push(s_is_base64);
+                                        value.push(s_value);
+                                    }
+                                    None => {
+                                        is_base64.push(false);
+                                        value.push(&line[ix_begin - 2..ix_end + 2])
+                                    }
+                                };
+                                ix_search = ix_end;
+                            }
+                            None => {
+                                value.push("=?");
+                                is_base64.push(false);
+                                ix_search = ix_begin - 2;
+                            }
+                        };
+                        break;
+                    }
+                    ix_search += 2;
+                    continue;
+                }
+                None => {
+                    if !is_whitespace(&line[ix_search..]) {
+                        value.push(&line[ix_search..]);
+                        is_base64.push(false);
+                    }
+                    break;
+                }
+            };
+        }
+        Self { is_base64, value }
+    }
+}

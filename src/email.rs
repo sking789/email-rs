@@ -1,7 +1,7 @@
 use crate::canonicalization::{
     canonicalize_body_relaxed, canonicalize_body_simple, canonicalize_headers_simple,
 };
-use crate::header::HeaderToken;
+use crate::header::{HeaderToken, SubjectHeader};
 use crate::{alloc::string::*, dkim::DkimParsingError};
 use crate::{alloc::vec::*, canonicalization::canonicalize_headers_relaxed};
 use crate::{dkim::CanonicalizationType, Header as DkimHeader};
@@ -19,6 +19,8 @@ pub struct Email<'a> {
     pub body: &'a str,
 
     pub dkim_headers: Vec<DkimHeader<'a>>,
+
+    pub subject_header: SubjectHeader<'a>,
 }
 
 /// For simplicity Email's body is now just going to be string.
@@ -81,10 +83,22 @@ impl<'a> Email<'a> {
             .map(|&val| DkimHeader::parse("Dkim-Signature", val.2))
             .collect::<Result<Vec<DkimHeader>, DkimParsingError>>()?;
 
+        let subject_header = allheaders
+            .iter()
+            .find_map(|v| {
+                if v.0.eq_ignore_ascii_case("subject") {
+                    Some(SubjectHeader::tokenize_subject_header_line(v.2))
+                } else {
+                    None
+                }
+            })
+            .ok_or(DkimParsingError::MissingField("subject"))?;
+
         Ok(Email {
             headers: allheaders,
             dkim_headers,
             body: val.get(1).unwrap_or(&""),
+            subject_header,
         })
     }
 
@@ -134,10 +148,10 @@ impl<'a> Email<'a> {
         Ok(value)
     }
 
-    pub fn get_header_value(&self,key:&'a str) -> Result<String,i32> {
+    pub fn get_header_value(&self, key: &'a str) -> Result<String, i32> {
         let item = self.get_header_item(key)?;
         let mut res = String::new();
-        for tok in crate::header::normalized_tokens(item){
+        for tok in crate::header::normalized_tokens(item) {
             match tok {
                 HeaderToken::Text(t) => {
                     res.push_str(t);
